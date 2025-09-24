@@ -1,5 +1,5 @@
 # Survey Visualizer integration Test Task
-## Demo: link
+[Demo Link](https://masqquerade.github.io/jb_survey_visualizer_integration/)
 
 ## Features
 - __Category List__: View a complete, searchable list of all trivia categories.
