@@ -1,0 +1,42 @@
+# Survey Visualizer integration Test Task
+## Demo: link
+
+## Features
+- __Category List__: View a complete, searchable list of all trivia categories.
+- __Question distribution by category__: A bar chart displayin the number of questions per category from a random sample.
+- __Question Distribution by difficulty__: A pie chart showing breakdown of questions by difficulty (Easy, Medium, Hard).
+- __Dynamic filtering__: Interactively filter the question data by selecting a specific category to update the difficulty distribution chart.
+
+## Stack
+- __JavaScript__
+- __React.js__
+- __Native fetch API__
+- __Recharts__
+- __Tailwind CSS__
+
+### Technical Challenges
+#### 1. The problem: Too Many Requests
+The Open Trivia API allows only __one request__ every 5 seconds per IP. On initial load, the app needs to:
+- Make initial categories request;
+- Get code 3 or 4 (token expired or empty);
+- Get new token and save it;
+- Repeat initial categories request with the token;
+- Make questions request.
+
+All of this steps was done immediately, which caused __Too Many Requests__ status code.
+
+#### The solution: Queue
+I implemented a FIFO request queue in the central API service __(src/services/api.js)__:
+- All API calls are added to the queue
+- A single processor works through the queue one item at time
+- After each request completes, the processor waits for the mandatory 5-second cooldown before starting the next request.
+
+This approach guarantees that the application never violates to server's rate limit.
+
+#### 2. The problem: Excessive Requests
+The queue solved the rate-limiting issua, but it created a poor user experience. If a user quickly clicked several different categories, the app would add all five requests to the queue. The user, who only cares about their last selection, would have to wait for all outdated requests to process.
+
+#### The solution: Debouncing + Request Cancellation
+To solve this, I implemented two solutions:
+- __Debouncing (useDebounce Hook)__: I introduced a debounce mechanism on the user's category selection. An API request is now only sent after user has stopped making changes for 500 ms. This prevents the queue from being spammed with unnecessary and outdated requests.
+- __Request Cancellation__: To handle the edge case where a debounced request has already beem sent but is now outdated, I integrated a cancellation system. When a new request is triggered, a cleanup function in __useEffect__ hook calls __controller.abort()__ (controller is a AbortController) on the previous request. The queue is smart enough to detect the aborted signal and will discard the request.
