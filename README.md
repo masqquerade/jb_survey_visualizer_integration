@@ -1,5 +1,6 @@
 # Survey Visualizer integration Test Task
 [Demo Link](https://masqquerade.github.io/jb_survey_visualizer_integration/)
+
 __Please note__: initial fetching of data can take some time (~15 seconds) because of usage of session tokens.
 
 ## Features
