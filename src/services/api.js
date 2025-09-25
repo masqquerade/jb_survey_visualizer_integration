@@ -24,7 +24,23 @@ const RESPONSE_CODES = {
   TOKEN_EMPTY: 4,
 
   ABORTED: 99,
+  WAITING: 100,
 };
+
+const unshiftRetrieveToken = () => {
+        queue.unshift({
+            url: RETRIEVE_TOKEN_URL,
+            resolve: (resetData) => {
+                if (resetData.token) {
+                    console.log("New token successfully retrieved: ", resetData.token)
+                    sessionStorage.setItem(TOKEN_STORAGE_KEY, resetData.token)
+                }
+            },
+            reject: (error) => console.error("Failed to retrieve new token: ", error),
+            signal: null,
+            tokenReq: false,
+        })
+}
 
 /**
  * Processes the API request queue one by one (FIFO).
@@ -50,65 +66,62 @@ const queueFetch = async () => {
 
     try {
         const token = sessionStorage.getItem(TOKEN_STORAGE_KEY)
-        const urlWithToken = `${url}&token=${token ? token : "x"}`
 
-        console.log("Url with token: ", urlWithToken)
-        const response = await fetch(tokenReq ? urlWithToken : url, { signal })
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-
-        const data = await response.json()
-        console.log("Fetched data: ", data)
-
-        if (data.response_code === RESPONSE_CODES.TOKEN_NOT_FOUND || data.response_code === RESPONSE_CODES.TOKEN_EMPTY) {
-            console.warn("Token is empty/expired. Refreshing...")
-
+        if (!token && tokenReq) {
             queue.unshift({ url, resolve, reject, signal });
-
-            queue.unshift({
-                url: RETRIEVE_TOKEN_URL,
-                resolve: (resetData) => {
-                    if (resetData.token) {
-                        console.log("New token successfully retrieved: ", resetData.token)
-                        sessionStorage.setItem(TOKEN_STORAGE_KEY, resetData.token)
-                    }
-                },
-                reject: (error) => console.error("Failed to retrieve new token: ", error),
-                signal: null,
-                tokenReq: false,
-            })
-        } else if (data.response_code === RESPONSE_CODES.NO_RESULTS) {
-            console.warn("No questions available. Trying to retrieve smaller amount...")
-
-            const originalUrlObject = new URL(url)
-            const category = originalUrlObject.searchParams.get("category")
-
-            if (category) {
-                queue.unshift({
-                    url: `${CATEGORY_COUNT_LOOKUP_URL}${category}`,
-                    resolve: (countData) => {
-                        const newAmount = countData.category_question_count.total_question_count
-                        console.log(`Found ${newAmount} questions.`)
-
-                        const retryUrlObject = new URL(url)
-                        retryUrlObject.searchParams.set("amount", newAmount)
-
-                        queue.unshift({
-                            url: retryUrlObject,
-                            resolve,
-                            reject,
-                            signal,
-                            tokenReq: true
-                        })
-                    },
-                    reject: (error) => console.error("Failed to get smaller amount: ", error),
-                    signal,
-                    tokenReq: false
-                })
-            }
-            
+            unshiftRetrieveToken()
         } else {
-            resolve(data)
+            const urlWithToken = `${url}&token=${token}`
+
+            console.log("Url with token: ", urlWithToken)
+            const response = await fetch(tokenReq ? urlWithToken : url, { signal })
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+
+            const data = await response.json()
+            console.log("Fetched data: ", data)
+
+            if (data.response_code === RESPONSE_CODES.TOKEN_NOT_FOUND || data.response_code === RESPONSE_CODES.TOKEN_EMPTY) {
+                console.warn("Token is empty/expired. Refreshing...")
+
+                queue.unshift({ url, resolve, reject, signal });
+
+                unshiftRetrieveToken()
+            } else if (data.response_code === RESPONSE_CODES.NO_RESULTS) {
+                console.warn("No questions available. Trying to retrieve smaller amount...")
+
+                const originalUrlObject = new URL(url)
+                const category = originalUrlObject.searchParams.get("category")
+
+                if (category) {
+                    queue.unshift({
+                        url: `${CATEGORY_COUNT_LOOKUP_URL}${category}`,
+                        resolve: (countData) => {
+                            const newAmount = countData.category_question_count.total_question_count
+                            console.log(`Found ${newAmount} questions.`)
+
+                            const retryUrlObject = new URL(url)
+                            retryUrlObject.searchParams.set("amount", newAmount)
+
+                            queue.unshift({
+                                url: retryUrlObject,
+                                resolve,
+                                reject,
+                                signal,
+                                tokenReq: true
+                            })
+                        },
+                        reject: (error) => console.error("Failed to get smaller amount: ", error),
+                        signal,
+                        tokenReq: false
+                    })
+                }
+                
+            } else {
+                resolve(data)
+            }
         }
+
+        
     } catch (error) {
         reject(error)
     } finally {

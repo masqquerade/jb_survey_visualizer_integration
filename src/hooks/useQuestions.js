@@ -28,11 +28,12 @@ export const useQuestions = (selectedCategory, amount) => {
         API.fetchQuestions({ amount, category: id }, { signal: controller.signal })
             .then(data => {
                 if (data.response_code === 0) {
+                    setIsLoading(false)
                     setQuestions(data.results)
                 } else if (data.response_code !== 99) {
                     console.error("Could not load questions.")
                     setQuestions([])
-                }
+                } 
         })
         .catch(error => {
             if (error.name !== "AbortError") {
