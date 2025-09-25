@@ -23,19 +23,23 @@ const Charts = ({ questions, selectedCategory, isLoading }) => {
 
                 {
                     isLoading ? <div className="flex items-center justify-center w-full h-96 text-white font-bold">Loading...</div> : 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {
-                            selectedCategory.id === -1 &&
-                                <ChartCard title={"Questions Distribution"}>
-                                    <CategoryChart data = {categoryDistribution}/>
-                                </ChartCard>
-                        }
-                        
-                        <ChartCard title={"Difficulty Distribution"}>
-                            <DifficultyChart
-                                data = {difficultyDistribution}
-                            />
-                        </ChartCard>
+                    
+                    <div>
+                        <h1 className="text-white font-bold mb-5">{selectedCategory.name}</h1>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {
+                                selectedCategory.id === -1 &&
+                                    <ChartCard title={"Questions Distribution"}>
+                                        <CategoryChart data = {categoryDistribution}/>
+                                    </ChartCard>
+                            }
+                            
+                            <ChartCard title={"Difficulty Distribution"}>
+                                <DifficultyChart
+                                    data = {difficultyDistribution}
+                                />
+                            </ChartCard>
+                        </div>
                     </div>
                 }
             </div>
