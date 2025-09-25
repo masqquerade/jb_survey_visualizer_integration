@@ -16,7 +16,7 @@ __Please note__: initial fetching of data can take some time (~15 seconds) becau
 - __Recharts__
 - __Tailwind CSS__
 
-### Technical Challenges
+## Technical Challenges
 #### 1. The problem: Too Many Requests
 The Open Trivia API allows only __one request__ every 5 seconds per IP. On initial load, the app needs to:
 - Make initial categories request;
