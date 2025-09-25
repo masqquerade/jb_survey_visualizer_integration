@@ -1,7 +1,7 @@
 # Survey Visualizer integration Test Task
 [Demo Link](https://masqquerade.github.io/jb_survey_visualizer_integration/)
 
-__Please note__: initial fetching of data can take some time (~15 seconds) because of usage of session tokens.
+__Please note__: initial fetching of data can take some time (~15 seconds) because of usage of session tokens. You can see detailed logging in the console.
 
 ## Features
 - __Category List__: View a complete, searchable list of all trivia categories.
