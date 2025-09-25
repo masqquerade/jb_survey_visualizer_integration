@@ -20,7 +20,7 @@ __Please note__: If the session token is expired or <50 questions from specific 
 #### 1. The problem: Too Many Requests
 The Open Trivia API allows only __one request__ every 5 seconds per IP. On initial load, the app needs to:
 - Request categories list
-- Get new token and save it;
+- Get new token and save it
 - Request 50 questions with new token
 
 All of this steps was done immediately, which caused __Too Many Requests__ status code.
