@@ -16,6 +16,11 @@ __Please note__: If the session token is expired or <50 questions from specific 
 - __Recharts__
 - __Tailwind CSS__
 
+## Getting started
+- Clone the repository
+- Install dependencies: `npm install`
+- Start test-server: `npm run dev`
+
 ## Technical Challenges
 #### 1. The problem: Too Many Requests
 The Open Trivia API allows only __one request__ every 5 seconds per IP. On initial load, the app needs to:
