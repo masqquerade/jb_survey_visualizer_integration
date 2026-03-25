@@ -1,5 +1,4 @@
 # Survey Visualizer integration Test Task
-[Demo Link](https://masqquerade.github.io/jb_survey_visualizer_integration/)
 
 __Please note__: If the session token is expired or <50 questions from specific category can be retrieved, the tool will need additional time. You can see detailed logging in the console.
 
