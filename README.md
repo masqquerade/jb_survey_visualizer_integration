@@ -49,5 +49,3 @@ To solve this, I implemented two solutions:
 As mentioned in the test task description, at least 50 questions should be used from the API. However, not all categories have enough questions. Therefore, sometimes status code 1 is being returned.
 #### The solution:
 - __Finding the count of questions in a category__: If status code 1 is returned from the DB API, internal service of the application creates another request to get the maximum possible number of questions in the specific category. As a next step, initial request is being repeated with the new amount of questions, preventing getting status code 1. Unfortunately, this leads to greater delays.
-
-__Thank you for taking the time to review my solution.__
